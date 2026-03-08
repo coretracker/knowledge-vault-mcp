@@ -1,0 +1,38 @@
+{
+  "name": "markdown-knowledge-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first Markdown knowledgebase with SQLite FTS5, MCP tools, and a minimal web UI.",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc --noEmit",
+    "index": "tsx src/indexer-cli.ts",
+    "watch": "tsx src/watch-cli.ts",
+    "server": "tsx src/mcp-http-server.ts",
+    "server:http": "tsx src/mcp-http-server.ts",
+    "server:stdio": "tsx src/mcp-server.ts",
+    "web": "tsx src/web-server.ts",
+    "dev": "concurrently -k -n WATCH,MCP,WEB -c yellow,cyan,green \"npm:watch\" \"npm:server:http\" \"npm:web\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "better-sqlite3": "^11.8.1",
+    "chokidar": "^4.0.3",
+    "express": "^4.21.2",
+    "gray-matter": "^4.0.3",
+    "marked": "^15.0.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.13.10",
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
