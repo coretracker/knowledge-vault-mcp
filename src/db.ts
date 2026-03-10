@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
 import { DB_PATH } from "./config.js";
-import type { ParsedChunk } from "./types.js";
+import type { ParsedChunk, ParsedLink } from "./types.js";
 
 export type SqliteDatabase = Database.Database;
 
@@ -13,6 +13,7 @@ interface UpsertDocumentInput {
   updatedAt: string;
   mtimeMs: number;
   chunks: ParsedChunk[];
+  links: ParsedLink[];
 }
 
 interface DocumentPathRow {
@@ -50,6 +51,20 @@ function initSchema(db: SqliteDatabase): void {
     CREATE INDEX IF NOT EXISTS idx_documents_path ON documents(path);
     CREATE INDEX IF NOT EXISTS idx_documents_updated_at ON documents(updated_at DESC);
     CREATE INDEX IF NOT EXISTS idx_chunks_document_id ON chunks(document_id);
+
+    CREATE TABLE IF NOT EXISTS document_links (
+      id INTEGER PRIMARY KEY,
+      source_document_id INTEGER NOT NULL,
+      target_path TEXT NOT NULL,
+      target_anchor TEXT NOT NULL DEFAULT '',
+      raw_target TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(source_document_id) REFERENCES documents(id) ON DELETE CASCADE,
+      UNIQUE(source_document_id, target_path, target_anchor)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_document_links_source ON document_links(source_document_id);
+    CREATE INDEX IF NOT EXISTS idx_document_links_target ON document_links(target_path);
 
     CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
       title,
@@ -116,9 +131,14 @@ export function upsertDocumentWithChunks(db: SqliteDatabase, input: UpsertDocume
 
   const selectDocumentId = db.prepare("SELECT id FROM documents WHERE path = ?");
   const deleteChunks = db.prepare("DELETE FROM chunks WHERE document_id = ?");
+  const deleteLinks = db.prepare("DELETE FROM document_links WHERE source_document_id = ?");
   const insertChunk = db.prepare(`
     INSERT INTO chunks (document_id, chunk_index, heading, anchor, body, title, tags, updated_at)
     VALUES (@document_id, @chunk_index, @heading, @anchor, @body, @title, @tags, @updated_at)
+  `);
+  const insertLink = db.prepare(`
+    INSERT INTO document_links (source_document_id, target_path, target_anchor, raw_target)
+    VALUES (@source_document_id, @target_path, @target_anchor, @raw_target)
   `);
 
   const tagsJson = JSON.stringify(input.tags);
@@ -140,6 +160,7 @@ export function upsertDocumentWithChunks(db: SqliteDatabase, input: UpsertDocume
     }
 
     deleteChunks.run(row.id);
+    deleteLinks.run(row.id);
 
     for (const chunk of input.chunks) {
       insertChunk.run({
@@ -151,6 +172,15 @@ export function upsertDocumentWithChunks(db: SqliteDatabase, input: UpsertDocume
         title: input.title,
         tags: tagsText,
         updated_at: input.updatedAt
+      });
+    }
+
+    for (const link of input.links) {
+      insertLink.run({
+        source_document_id: row.id,
+        target_path: link.targetPath,
+        target_anchor: link.targetAnchor ?? "",
+        raw_target: link.rawTarget
       });
     }
 

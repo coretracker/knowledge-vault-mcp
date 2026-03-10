@@ -59,7 +59,8 @@ export async function indexSingleFile(
     tags: parsed.tags,
     updatedAt,
     mtimeMs: stat.mtimeMs,
-    chunks: parsed.chunks
+    chunks: parsed.chunks,
+    links: parsed.links
   });
 
   return { relativePath, chunkCount: result.chunkCount };

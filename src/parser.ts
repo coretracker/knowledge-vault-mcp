@@ -1,7 +1,7 @@
 import path from "node:path";
 import matter from "gray-matter";
 import { marked } from "marked";
-import type { HeadingInfo, ParsedChunk, ParsedMarkdownDocument } from "./types.js";
+import type { HeadingInfo, ParsedChunk, ParsedLink, ParsedMarkdownDocument } from "./types.js";
 
 interface MinimalToken {
   type: string;
@@ -71,6 +71,116 @@ function tokenToRawMarkdown(token: MinimalToken): string {
   }
 
   return "";
+}
+
+function parseInlineLinkTarget(rawTarget: string): { pathPart: string; anchor: string | null } | null {
+  let target = rawTarget.trim();
+  if (!target) {
+    return null;
+  }
+
+  if (target.startsWith("<") && target.endsWith(">")) {
+    target = target.slice(1, -1).trim();
+  } else {
+    const firstWhitespace = target.search(/\s/);
+    if (firstWhitespace !== -1) {
+      target = target.slice(0, firstWhitespace).trim();
+    }
+  }
+
+  if (!target) {
+    return null;
+  }
+
+  const lowered = target.toLowerCase();
+  if (
+    lowered.startsWith("http://") ||
+    lowered.startsWith("https://") ||
+    lowered.startsWith("mailto:") ||
+    lowered.startsWith("tel:") ||
+    lowered.startsWith("data:")
+  ) {
+    return null;
+  }
+
+  if (target.startsWith("#")) {
+    return { pathPart: "", anchor: target.slice(1) || null };
+  }
+
+  const hashIndex = target.indexOf("#");
+  if (hashIndex === -1) {
+    return { pathPart: target, anchor: null };
+  }
+
+  return {
+    pathPart: target.slice(0, hashIndex),
+    anchor: target.slice(hashIndex + 1) || null
+  };
+}
+
+function normalizeLinkedPath(sourceRelativePath: string, pathPart: string): string | null {
+  const sourceDir = path.posix.dirname(sourceRelativePath.replace(/\\/g, "/"));
+  const rawPath = pathPart.trim();
+  if (!rawPath) {
+    return sourceRelativePath.replace(/\\/g, "/");
+  }
+
+  const withoutQuery = rawPath.split("?")[0];
+  if (!withoutQuery) {
+    return null;
+  }
+
+  const normalized = withoutQuery.startsWith("/")
+    ? path.posix.normalize(withoutQuery.replace(/^\/+/, ""))
+    : path.posix.normalize(path.posix.join(sourceDir, withoutQuery));
+
+  if (normalized.startsWith("../")) {
+    return null;
+  }
+
+  const ext = path.posix.extname(normalized);
+  if (!ext) {
+    return `${normalized}.md`;
+  }
+
+  if (ext.toLowerCase() !== ".md") {
+    return null;
+  }
+
+  return normalized;
+}
+
+function extractMarkdownLinks(sourceRelativePath: string, markdownBody: string): ParsedLink[] {
+  const links: ParsedLink[] = [];
+  const seen = new Set<string>();
+  const linkPattern = /\[[^\]]*?\]\(([^)]+)\)/g;
+
+  for (const match of markdownBody.matchAll(linkPattern)) {
+    const rawTarget = (match[1] ?? "").trim();
+    const parsed = parseInlineLinkTarget(rawTarget);
+    if (!parsed) {
+      continue;
+    }
+
+    const targetPath = normalizeLinkedPath(sourceRelativePath, parsed.pathPart);
+    if (!targetPath) {
+      continue;
+    }
+
+    const key = `${targetPath}#${parsed.anchor ?? ""}`;
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    links.push({
+      rawTarget,
+      targetPath,
+      targetAnchor: parsed.anchor
+    });
+  }
+
+  return links;
 }
 
 export function parseMarkdown(filePath: string, markdown: string): ParsedMarkdownDocument {
@@ -145,6 +255,7 @@ export function parseMarkdown(filePath: string, markdown: string): ParsedMarkdow
     tags: extractTags(parsed.data.tags ?? parsed.data.tag),
     headings,
     chunks,
+    links: extractMarkdownLinks(filePath, body),
     frontmatter: parsed.data as Record<string, unknown>,
     body
   };

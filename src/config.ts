@@ -16,3 +16,10 @@ export const WEB_PORT = Number(process.env.WEB_PORT ?? "3030");
 export const MCP_HTTP_HOST = process.env.MCP_HTTP_HOST ?? "127.0.0.1";
 export const MCP_HTTP_PORT = Number(process.env.MCP_HTTP_PORT ?? "3000");
 export const MCP_API_KEY = process.env.MCP_API_KEY;
+export const MCP_ACTION_LOG_PATH = process.env.MCP_ACTION_LOG_PATH
+  ? path.resolve(process.env.MCP_ACTION_LOG_PATH)
+  : path.join(DATA_DIR, "mcp-actions.jsonl");
+export const MCP_WRITE_AUDIT_LOG_PATH = process.env.MCP_WRITE_AUDIT_LOG_PATH
+  ? path.resolve(process.env.MCP_WRITE_AUDIT_LOG_PATH)
+  : path.join(DATA_DIR, "mcp-write-audit.jsonl");
+export const MCP_ENABLE_WRITE_TOOLS = process.env.MCP_ENABLE_WRITE_TOOLS !== "0";

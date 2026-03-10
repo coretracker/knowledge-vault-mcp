@@ -10,7 +10,7 @@ async function main(): Promise<void> {
   logAction("startup");
 
   const server = new McpServer({
-    name: "markdown-knowledge-mcp",
+    name: "KnowledgeVaultMCP",
     version: "0.1.0"
   });
 

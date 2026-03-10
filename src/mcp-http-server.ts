@@ -89,7 +89,7 @@ app.all("/mcp", async (req: Request, res: Response) => {
         transport = sessions[sessionId].transport;
       } else if (!sessionId && isInitializeRequest(req.body)) {
         const server = new McpServer({
-          name: "markdown-knowledge-mcp",
+          name: "KnowledgeVaultMCP",
           version: "0.1.0"
         });
         registerKnowledgeTools(server, db, logAction);
