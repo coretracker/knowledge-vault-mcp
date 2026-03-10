@@ -219,6 +219,18 @@ You can:
 - inspect matching sections shown for a query
 - view recent changes list
 
+## GitHub Pages
+
+This repo includes a GitHub Pages workflow that publishes `docs/` on pushes to `main`.
+
+After pushing, the site will be available at:
+
+- `https://coretracker.github.io/knowledge-vault-mcp/`
+
+If the first deployment does not appear, set:
+
+- **Repo Settings -> Pages -> Source: GitHub Actions**
+
 ## Local Test Flow
 
 1. `npm run index`

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KnowledgeVaultMCP</title>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --surface: #ffffff;
+        --stroke: #cbd5e1;
+        --text: #0f172a;
+        --muted: #475569;
+        --accent: #3b82f6;
+        --accent-strong: #2563eb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+        color: var(--text);
+        background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+        min-height: 100vh;
+      }
+      .page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 32px 16px 48px;
+        display: grid;
+        gap: 16px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--stroke);
+        border-radius: 14px;
+        padding: 18px;
+      }
+      .eyebrow {
+        margin: 0;
+        font-size: 12px;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      h1 {
+        margin: 6px 0 0;
+        font-size: 38px;
+        line-height: 1.1;
+      }
+      p {
+        margin: 0;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .btn-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        border: 1px solid var(--accent-strong);
+        background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+        color: #eff6ff;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 700;
+      }
+      code {
+        font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+        background: #f1f5f9;
+        border: 1px solid var(--stroke);
+        border-radius: 6px;
+        padding: 1px 6px;
+      }
+      ul {
+        margin: 8px 0 0;
+        padding-left: 18px;
+      }
+      li + li {
+        margin-top: 6px;
+      }
+      @media (max-width: 760px) {
+        h1 {
+          font-size: 30px;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="card">
+        <p class="eyebrow">KnowledgeVaultMCP</p>
+        <h1>Local-first MCP knowledgebase</h1>
+        <p class="muted" style="margin-top: 10px">
+          Markdown + SQLite FTS5 + MCP tools + lightweight web diagnostics.
+        </p>
+      </section>
+
+      <section class="card">
+        <div class="btn-row">
+          <a class="btn" href="https://github.com/coretracker/knowledge-vault-mcp">View Repository</a>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2 style="margin: 0; font-size: 22px">Quick Start</h2>
+          <ul>
+            <li><code>npm install</code></li>
+            <li><code>npm run index</code></li>
+            <li><code>npm run dev</code></li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h2 style="margin: 0; font-size: 22px">MCP Endpoint</h2>
+          <p class="muted" style="margin-top: 10px">
+            Local HTTP endpoint:
+          </p>
+          <p style="margin-top: 8px">
+            <code>http://127.0.0.1:3000/mcp</code>
+          </p>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
