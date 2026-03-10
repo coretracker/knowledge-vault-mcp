@@ -48,6 +48,10 @@ npm run dev
 - MCP HTTP server (`http://127.0.0.1:3000/mcp`)
 - web UI (`http://localhost:3030`)
 
+## Knowledge Files Location
+
+Store your documentation and notes in `knowledge/` as Markdown files (`knowledge/**/*.md`).
+
 ## Commands
 
 ```bash
